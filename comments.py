@@ -3,67 +3,71 @@ import pandas as pd
 from selenium import webdriver
 from time import sleep
 import random
+import csv
+from selenium.webdriver.common.actions.action_builder import ActionBuilder
+from selenium.webdriver.common.actions.mouse_button import MouseButton
+
+from selenium.webdriver import ActionChains
+from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from openpyxl.workbook import Workbook
 
-#Chúng ta làm việc với ứng dụng web nên trong bài này trước hết cần install thư viện selenium (đây là thư viện hỗ trợ kiểm thử  tự động cho các ứng dụng web trên nhiều trình duyệt khác nhau)
-#Để làm việc với các trình duyệt web từ thư viện selenium cần xuất webdriver
-#Để điều khiển trình duyệt  Chrome bằng code python cần truyền vào đường dẫn của chromedriver
-driver = webdriver.Chrome("chromedriver.exe")
+driver = webdriver.Edge()
 
-#1.Mở trang web facebook từ đối tượng driver đã tạo ở trên
 driver.get("http://facebook.com")
-# ##Dừng chương trình 5s -> điều này giúp tránh việc các lệnh bị thực hiện liên tiếp -> trình duyệt ko kịp tải
-sleep(random.randint(5,10))
+sleep(random.randint(5, 10))
 
-#2.Thực hiện đăng nhập: Tên đăng nhập và mật khẩu trên fb có thuộc tính id bằng email và pass
-#Sử dụng lênhj find_element_by_id để tìm kiếm đối tượng có thuộc tính này
+tên_đăng_nhập = driver.find_element(By.ID, "email")
+tên_đăng_nhập.send_keys("duuu2001@gmail.com")
+sleep(1)
 
-#Điền phonenumerber or email
-tên_đăng_nhập= driver.find_element_by_id("email")
-tên_đăng_nhập.send_keys("0984040845") #Thực hiện điền tên đăng nhập
-sleep(random.randint(5,10))
-#Điền mật khẩu
-password = driver.find_element_by_id("pass")
-password.send_keys("abc@123")      #Thực hiện điền mặt khẩu
-password.send_keys(Keys.ENTER)     #Nhấp phím enter để đăng nhập
-sleep(random.randint(20,30))
+password = driver.find_element(By.ID, "pass")
+password.send_keys("Chicananc0m")
+password.send_keys(Keys.ENTER)
+sleep(1)
+df = pd.DataFrame()
+links = ['https://www.facebook.com/share/p/9AkEdWud4PAXdeEq/?mibextid=oFDknk','https://www.facebook.com/share/p/sEb5JAZbFrJKYH5G/?mibextid=oFDknk']
+for link in links:
+    driver.get(link)
+    sleep(5)
+    clickable = driver.find_element(By.XPATH, '//*')
+    ActionChains(driver) \
+        .click(clickable) \
+        .perform()
 
-#3.Truy cập vào bài post cần lấy comments bằng URL
-driver.get("https://www.facebook.com/cafebiz.vn/posts/pfbid02s3nogSic8pCP5AY33fVTYHvixUC2ekZ3rVGqxCPg573WwUrqiPSXjdvPgTdSg3J7l")
-sleep(random.randint(5,10))
+    # i = 0
+    # while i<10:
+    #      scroll = driver.find_element(By.TAG_NAME, 'body').send_keys(Keys.END)
+    #      sleep(2)
 
-#Sử dụng xpath để tìm kiếm phần tử theo tên thẻ, nội dung thuộc tính
-#3.1 Hiện comment
-#Chọn vào mục lựa chọn cách hiển hiển thị comment(Most relevant, Newest, All Comments)
-choice= driver.find_element_by_xpath("/html/body/div[1]/div/div[1]/div/div[3]/div/div/div/div[1]/div[1]/div/div/div/div/div/div/div/div/div/div/div/div/div/div[8]/div/div/div[4]/div/div/div[2]/div[2]/div/div/div/span")
-choice.click() #lệnh click để nhấp vào phần tử đã đang tìm kiếm
-sleep(random.randint(5,10))
+    show_all_comments = driver.find_element(By.XPATH,
+                                            '//div/div/div[1]/div/div[3]/div/div/div[1]/div[1]/div/div/div/div[2]/div/div/div/div/div/div/div/div/div/div[13]/div/div/div[4]/div/div/div[2]/div[2]/div/div/span')
+    show_all_comments.click()
+    sleep(2)
+    # show_all = driver.find_element(By.XPATH,
+    #                                '//div/div/div[1]/div/div[3]/div/div/div[2]/div/div/div[1]/div[1]/div/div/div/div/div/div/div[1]/div/div[3]/div[1]/div/div[1]/span')
+    # show_all.click()
+    show_all = driver.find_element(By.XPATH,
+                                   '//div/div/div[1]/div/div[3]/div/div/div[2]/div/div/div[1]/div[1]/div/div/div/div/div/div/div[1]/div/div[3]/div[1]/div/div[1]/span')
+    show_all.click()
+    i = 0
+    while i < 50:
+        scroll = driver.find_element(By.TAG_NAME, 'body').send_keys(Keys.END)
+        i += 1
+        sleep(1)
 
-#3.2 Chọn vào mục All Comments
-show_all_comments = driver.find_element_by_xpath("/html/body/div[1]/div/div[1]/div/div[3]/div/div/div/div[2]/div/div/div[1]/div[1]/div/div/div/div/div/div/div[1]/div/div[3]/div[1]")
-show_all_comments.click()
-sleep(random.randint(5,10))
+    comment_list = driver.find_elements(By.XPATH, '//div[@role="article"]')
+    sleep(random.randint(5, 10))
+    times = driver.find_elements(By.XPATH, '//span[@class = "html-span xdj266r x11i5rnm xat24cr x1mh8g0r xexx8yu x4uap5 x18d9i69 xkhd6sd x1hl2dhg x16tdsg8 x1vvkbs"]')
+    sleep(5)
 
-#3.3 Chọn hiển thị thêm comments
-show_more_comments= driver.find_element_by_xpath("/html/body/div[1]/div/div[1]/div/div[3]/div/div/div/div[1]/div[1]/div/div/div/div/div/div/div/div/div/div/div/div/div/div[8]/div/div/div[4]/div/div/div[2]/div[4]/div[1]/div[2]/span/span")
-show_more_comments.click()
-sleep(random.randint(5,10))
-
-
-show_more_comments= driver.find_element_by_xpath("/html/body/div[1]/div/div[1]/div/div[3]/div/div/div/div[1]/div[1]/div/div/div/div/div/div/div/div/div/div/div/div/div/div[8]/div/div/div[4]/div/div/div[2]/div[4]/div[1]/div[2]/span/span")
-show_more_comments.click()
-sleep(random.randint(5,10))
-
-#4. Lấy rất cả các comment bằng cách lấy tất cả nội dung có đường dẫn
-comment_list= driver.find_elements_by_xpath('//div[@role="article"]')  # tìm kiếm tất cả các comment đều có thuộc tính div[@role="article"]
-sleep(random.randint(5,10))
-
-f1=pd.DataFrame() #Tạo một cấu trúc dữ liệu hai chiều của thư viện pandas phục vụ cho việc xuất dữ liệu ra file
-#4.1 Hiện thị nội dung comment ra màn hình và xuất ra file
-for comment in comment_list:
-     content = comment.find_element_by_xpath('.//div[@class="x1lliihq xjkvuk6 x1iorvi4"]') #Tím kiếm tất cả các phần tử con của phần tử comment có thuộc tính class="x1lliihq xjkvuk6 x1iorvi4"
-     a= content.text  #.text có tác dụng trả về nội dung văn bản được hiển thị trên trình duyệt web
-     print(a)
-     f1 = f1._append(pd.DataFrame([a])) #Thêm content được tìm thấy vào DataFrame đã tạo
-     f1.to_excel('D:\Crawl comment từ facebook\content.xlsx', sheet_name= "Sheet1") #Xuất dữ liệu ra file excell
+    for comment in comment_list:
+        try:
+            content = comment.find_element(By.XPATH, './/div[@class="x1lliihq xjkvuk6 x1iorvi4"]')
+        except:
+            continue
+        a = content.text
+        print(a)
+        df = pd.concat([df, pd.DataFrame([a])])
+    df = df.reset_index(drop=True)
+    df.to_csv('fbcomment.csv', index=False)
